@@ -1,0 +1,8 @@
+*.pem
+*.xlsx
+
+dpkeys/*
+!dpkeys/.gitkeep
+
+snapshots/*
+!snapshots/.gitkeep
