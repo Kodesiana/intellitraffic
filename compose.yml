@@ -1,0 +1,60 @@
+volumes:
+  alloy:
+
+networks:
+  bogorintellitraffic:
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: "./src/web/Dockerfile"
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - "bogorintellitraffic"
+    volumes:
+      - "./data/database:/data/database:rw"
+      - "./data/snapshots:/data/snapshots:rw"
+      - "./data/dpkeys:/home/app/.aspnet/DataProtection-Keys:rw"
+    env_file:
+      - ".env"
+
+  mediamtx:
+    image: "bluenviron/mediamtx:1.12.2-ffmpeg"
+    ports:
+      - "8888:8888"
+      - "9997:9997"
+    networks:
+      - "bogorintellitraffic"
+    volumes:
+      - "./src/mediamtx/mediamtx.yml:/mediamtx.yml:ro"
+
+  nginx:
+    build: "./src/reverse-proxy"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - "bogorintellitraffic"
+  
+  alloy:
+    image: grafana/alloy:v1.8.3
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "/etc/alloy/config.alloy"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "12345:12345"
+    networks:
+    - "bogorintellitraffic"
+    volumes:
+      - "./src/grafana-alloy/config.alloy:/etc/alloy/config.alloy"
+      - "alloy:/var/lib/alloy/data"
+    env_file:
+      - ".env"
+
