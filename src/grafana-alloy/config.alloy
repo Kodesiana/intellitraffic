@@ -1,0 +1,82 @@
+// Remote Config for Fleet Management
+// remotecfg {
+// 	url            = "https://fleet-management-prod-013.grafana.net"
+// 	id             = "kodesiana-intellitraffic-vm-1-oracle"
+// 	poll_frequency = "60s"
+
+// 	basic_auth {
+// 		username = "959919"
+// 		password = sys.env("GRAFANA_API_KEY")
+// 	}
+// }
+
+// Input: OpenTelemetry Collector
+otelcol.receiver.otlp "otlp_receiver" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.batch.default.input]
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+
+// Processor: Batching
+otelcol.processor.batch "default" {
+  output {
+    metrics = [otelcol.exporter.prometheus.default.input]
+    logs    = [otelcol.exporter.loki.default.input]
+    traces  = [otelcol.exporter.otlp.grafanacloud_tempo.input]
+  }
+}
+
+// Output: Prometheus
+otelcol.exporter.prometheus "default" {
+  forward_to = [prometheus.remote_write.grafanacloud.receiver]
+}
+
+prometheus.remote_write "grafanacloud" {
+  endpoint {
+    url = "https://prometheus-prod-37-prod-ap-southeast-1.grafana.net/api/prom/push"
+
+    basic_auth {
+      username = "1635525"
+      password = sys.env("GRAFANA_API_KEY")
+    }
+  }
+}
+
+// Output: Loki
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.grafanacloud.receiver]
+}
+
+loki.write "grafanacloud" {
+  endpoint {
+    url = "https://logs-prod-020.grafana.net/loki/api/v1/push"
+
+    basic_auth {
+      username = "917699"
+      password = sys.env("GRAFANA_API_KEY")
+    }
+  }
+}
+
+// Output: Tempo
+otelcol.auth.basic "grafanacloud_tempo" {
+  username = "912015"
+  password = sys.env("GRAFANA_API_KEY")
+}
+
+otelcol.exporter.otlp "grafanacloud_tempo" {
+  client {
+    endpoint = "tempo-prod-14-prod-ap-southeast-1.grafana.net:443"
+    auth = otelcol.auth.basic.grafanacloud_tempo.handler
+  }
+}
