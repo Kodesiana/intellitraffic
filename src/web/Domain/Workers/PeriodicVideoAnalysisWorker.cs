@@ -138,7 +138,8 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
                 {
                     Id = Guid.CreateVersion7(),
                     CameraId = item.cameraId,
-                    ResultId = history.Result.Id
+                    ResultId = history.Result.Id,
+                    LastUpdate = DateTime.UtcNow,
                 }, ct);
             }
         }
