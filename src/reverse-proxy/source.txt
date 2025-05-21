@@ -1,0 +1,1 @@
+https://www.digitalocean.com/community/tools/nginx?domains.0.https.certType=custom&domains.0.php.php=false&domains.0.reverseProxy.reverseProxy=true&domains.0.routing.index=index.html&domains.0.routing.fallbackHtml=true&domains.0.logging.accessLogEnabled=false&domains.0.logging.errorLogEnabled=false
