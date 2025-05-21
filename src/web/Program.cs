@@ -57,7 +57,7 @@ builder.Services.AddDbContextFactory<BogorContext>(options =>
             context.SaveChanges();
         })
         .UseSnakeCaseNamingConvention()
-        .EnableSensitiveDataLogging());
+        .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()));
 
 // Add services
 builder.Services.AddSingleton<IStreamGrabberService, StreamGrabberService>();
