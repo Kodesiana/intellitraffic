@@ -7,6 +7,7 @@ using Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Configuration;
 using Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Database;
 using Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Registrations;
 using Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using OpenAI.Chat;
@@ -76,13 +77,22 @@ builder.Services.AddHostedService<PeriodicVideoAnalysisWorker>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+    
     app.UseExceptionHandler("/error", true);
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 app.UseAntiforgery();
 app.UseStaticFiles(new StaticFileOptions
 {
