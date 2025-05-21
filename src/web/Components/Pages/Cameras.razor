@@ -1,0 +1,93 @@
+﻿@page "/cameras"
+@using Microsoft.Extensions.Options
+@inject ILogger<Cameras> Logger
+@inject IDbContextFactory<BogorContext> DbFactory
+@inject IOptions<AnalysisConfig> Config
+
+<PageTitle>CCTV Gallery</PageTitle>
+
+@if (_state == ViewState.Loading)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+    return;
+}
+
+@if (_state == ViewState.NotFound)
+{
+    <p>No registered camera is found.</p>
+    return;
+}
+
+<div class="is-flex is-flex-direction-column is-align-items-center">
+    <h1 class="title has-text-centered my-6">CCTV Gallery</h1>
+    <NavLink href="/" class="button is-medium is-outlined is-link mb-6">
+        <span class="icon">
+            <i class="fa-solid fa-arrow-left"></i>
+        </span>
+        <span>Back to home</span>
+    </NavLink>
+</div>
+
+<div class="fixed-grid has-4-cols">
+    <div class="grid">
+        @foreach (var camera in _cameras)
+        {
+            <div class="cell">
+                <div class="box p-3">
+                    <h4 class="has-text-centered has-text-weight-semibold">@camera.GivenName</h4>
+                    <h5 class="has-text-centered">@camera.OverlayName</h5>
+
+                    <video id="cctv-@camera.CameraId"
+                           class="video-js mt-3"
+                           preload="auto"
+                           autoplay
+                           controls
+                           muted
+                           data-setup='{"liveui": true}'>
+                        <source src="@camera.StreamUrl" type="application/x-mpegURL"/>
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a
+                            web browser that
+                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5
+                                video</a>
+                        </p>
+                    </video>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private ViewState _state = ViewState.Loading;
+    private List<GalleryItem>? _cameras;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _cameras = await context.Cameras
+            .AsNoTracking()
+            .Select(x => new GalleryItem
+            {
+                CameraId = x.Id,
+                GivenName = x.GivenName,
+                OverlayName = x.OverlayName,
+                StreamUrl = string.Format(Config.Value.HlsStreamingFormatUri, x.HlsStreamName)
+            })
+            .ToListAsync();
+
+        _state = _cameras.Count > 0 ? ViewState.Ok : ViewState.NotFound;
+    }
+
+    // --- VIEW MODEL
+    public record GalleryItem
+    {
+        public Guid CameraId { get; set; }
+        public string GivenName { get; set; }
+        public string OverlayName { get; set; }
+        public string StreamUrl { get; set; }
+    }
+
+}

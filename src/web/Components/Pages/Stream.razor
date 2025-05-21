@@ -1,0 +1,89 @@
+﻿@page "/stream/{CameraId:guid}"
+@using Microsoft.Extensions.Options
+@inject ILogger<Stream> Logger;
+@inject IDbContextFactory<BogorContext> DbFactory
+@inject IOptions<AnalysisConfig> Config
+@inject IJSRuntime JS
+
+<PageTitle>[🔴LIVE] @(_camera?.GivenName ?? "CCTV Bogor")</PageTitle>
+
+@if (_state == ViewState.Loading)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+    return;
+}
+
+@if (_state == ViewState.NotFound)
+{
+    <p>No registered camera is found.</p>
+    return;
+}
+
+<div class="is-flex is-flex-direction-column is-align-items-center">
+    <h2 class="title has-text-centered mt-6 mb-3">@_camera.GivenName</h2>
+    <h4 class="subtitle has-text-centered mb-4">@_camera.OverlayName</h4>
+
+    <div class="is-flex is-flex-direction-row my-6" style="column-gap: 0.5rem;">
+        <NavLink class="button" href="/">
+            <span class="icon is-small">
+                <i class="fa-solid fa-arrow-left"></i>
+            </span>
+            <span>Back to Home</span>
+        </NavLink>
+        <NavLink class="button" href="@($"/history/{_camera.Id}")">
+            <span class="icon is-small">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </span>
+            <span>View History</span>
+        </NavLink>
+    </div>
+
+    <video id="cctv-live-stream"
+           class="video-js mt-6"
+           preload="auto"
+           autoplay
+           controls
+           muted
+           data-setup='{"liveui": true}'>
+        <source src="@_streamUrl" type="application/x-mpegURL"/>
+        <p class="vjs-no-js">
+            To view this video please enable JavaScript, and consider upgrading to a
+            web browser that
+            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+        </p>
+    </video>
+</div>
+
+@code {
+    [Parameter] public Guid CameraId { get; set; }
+
+    private ViewState _state = ViewState.Loading;
+    private Camera? _camera;
+    private string _streamUrl = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _camera = await context.Cameras.SingleOrDefaultAsync(x => x.Id == CameraId);
+        if (_camera is null)
+        {
+            _state = ViewState.NotFound;
+            Logger.LogWarning("Camera not found");
+            return;
+        }
+
+        _state = ViewState.Ok;
+        _streamUrl = string.Format(Config.Value.HlsStreamingFormatUri, _camera.HlsStreamName);
+
+        // _model = new()
+        // {
+        //     Name = camera.GivenName,
+        //     StreamUrl = camera.StreamUrl,
+        //     // StreamUrl = "http://localhost:8888/proxy/35336564-5b50-489b-a746-5e2ab3a5d023/index.m3u8"
+        //     // StreamUrl = "https://restreamer.kotabogor.go.id/memfs/35336564-5b50-489b-a746-5e2ab3a5d023.m3u8"
+        // };
+    }
+
+}

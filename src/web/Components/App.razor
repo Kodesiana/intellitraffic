@@ -1,0 +1,71 @@
+﻿@inject IConfiguration Config
+
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+
+<head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <base href="/"/>
+
+      <link rel="icon" type="image/png" href="favicon.png">
+
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.3/css/bulma.min.css"
+            integrity="sha512-4EnjWdm80dyWrJ7rh/tlhNt6fJL52dSDSHNEqfdVmBLpJLPrRYnFa+Kn4ZZL+FRkDL5/7lAXuHylzJkpzkSM2A=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+            integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+            integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.22.0/alt/video-js-cdn.min.css"
+            integrity="sha512-7wMpNCbZmQmUPa3OOvqZo2TbK4n4xy4hdSWvxXKaJH8tR/9+7YFS0qyiKK3FV3tE6ANeSAdd3xfFQbf71P5Dfw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/4.5.0/apexcharts.min.css"
+            integrity="sha512-GYnB8VtwHkNFCJm4orQd6q2RT0mMp2ejGP5CQmPOqUKDXSzVgAOv32PJw3I7HjbpJDdOA5xXFkBW7XGtc7MmPA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+      <link rel="stylesheet" href="@Assets["Kodesiana.BogorIntelliTraffic.Web.styles.css"]"/>
+
+      <!-- Google tag (gtag.js) -->
+      <script async
+              src="https://www.googletagmanager.com/gtag/js?id=@Config["Integrations:GoogleAnalytics:MeasurementId"]"></script>
+      <script>
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+                  dataLayer.push(arguments);
+            }
+
+            gtag('js', new Date());
+            gtag('config', 'G-9N23P00W5M');
+      </script>
+
+      <ImportMap/>
+      <HeadOutlet/>
+</head>
+
+<body>
+<Routes/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.22.0/video.min.js"
+        integrity="sha512-0ywUhsu4ODVwVU1HQMDcn8CrHXxOiWgEj0uPabkuRQFUQpgtdguHnOZ4Uihz9Y9WUSJQphS2dp3jOlB0QwD0iA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+@* <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@4/+esm"></script> *@
+@* <script type="module" src="https://cdn.jsdelivr.net/npm/hls-video-element@1.2/+esm"></script> *@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/4.5.0/apexcharts.min.js"
+        integrity="sha512-yMnvLee1a5S9nemgCoMth5YvOchnQMFMOSao/bH6SLAXZnauuHs1gd92DnE9+sVQ5aglei3LZDelg8LauSlWkw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="_framework/blazor.web.js" autostart="false"></script>
+<script>
+      Blazor.start({
+            ssr: {disableDomPreservation: true}
+      });
+</script>
+</body>
+
+</html>

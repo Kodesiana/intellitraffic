@@ -1,0 +1,42 @@
+﻿#map {
+    height: 100%;
+    width: 100%;
+}
+
+.container-sidebar {
+    min-width: 500px !important;
+}
+
+.container-full-height {
+    height: 100vh;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    column-gap: 10px;
+}
+
+.cctv-container {
+    height: 80vh;
+    margin-top: 2rem;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    justify-content: center;
+    padding: 1rem;
+    row-gap: 12px;
+}
+
+.cctv-item {
+    border: 1px solid hsl(0, 0%, 29%);
+    border-radius: var(--bulma-radius-large);
+    padding: 1.25rem;
+    width: 100%;
+}

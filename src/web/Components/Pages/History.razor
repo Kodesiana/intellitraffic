@@ -1,0 +1,160 @@
+﻿@page "/history/{CameraId:guid}"
+@inject ILogger<Home> Logger
+@inject IDbContextFactory<BogorContext> DbFactory
+@rendermode InteractiveServer
+
+
+<PageTitle>CCTV History</PageTitle>
+
+@if (_state == ViewState.Loading)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+    return;
+}
+
+@if (_state == ViewState.NotFound)
+{
+    <h1>Not Found!</h1>
+    return;
+}
+
+<PageTitle>CCTV @_camera.GivenName</PageTitle>
+
+<h1 class="title has-text-centered mt-6">@_camera.GivenName</h1>
+<h2 class="subtitle has-text-centered mt-2 mb-4">@_camera.OverlayName</h2>
+
+<NavLink class="button has-text-centered mb-6" href="/">
+    <span class="icon is-small">
+        <i class="fa-solid fa-arrow-left"></i>
+    </span>
+    <span>Back to Home</span>
+</NavLink>
+
+<div class="fixed-grid has-2-cols">
+    <div class="grid is-gap-3">
+        @foreach (var item in _items)
+        {
+            <div class="cell">
+                <div class="card">
+                    <div class="card-image">
+                        <figure class="image is-5by3">
+                            <img src="@item.SnapshotUrl"
+                                 alt="CCTV footage at @FormatLongDate(item.CreatedAt)"/>
+                        </figure>
+                    </div>
+                    <div class="card-content">
+                        <div class="is-flex mt-4">
+                            <p class="mr-4"><i class="fa-solid fa-car"></i> @item.TotalVehicles vehicles</p>
+                            <p class="mr-4">
+                                @if (item.HasCrowding)
+                                {
+                                    <span><i class="fa-solid fa-users"></i> Crowded</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fa-solid fa-user"></i> Not crowded</span>
+                                }
+                            </p>
+
+                            @if (item.HasAccident)
+                            {
+                                <p class="mr-4">
+                                    <span><i class="fa-solid fa-car-burst"></i> Possible road accident</span>
+                                </p>
+                            }
+
+                            @if (item.Density != TrafficDensity.Unknown)
+                            {
+                                <p class="mr-4">
+                                    @if (item.Density == TrafficDensity.Light)
+                                    {
+                                        <span><i class="fa-solid fa-gauge-high"></i> Light traffic</span>
+                                    }
+                                    else if (item.Density == TrafficDensity.Moderate)
+                                    {
+                                        <span><i class="fa-solid fa-gauge-high"></i> Moderate traffic</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fa-solid fa-gauge-high"></i> Heavy traffic</span>
+                                    }
+                                </p>
+                            }
+
+                            <p class="mr-4">
+                                <i class="fa-solid fa-clock"></i>
+                                <time datetime="@FormatLongDate(item.CreatedAt)">@FormatLongDate(item.CreatedAt)</time>
+                            </p>
+                        </div>
+
+                        <div class="content mt-2">
+                            @item.Summary
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid CameraId { get; set; }
+
+    private ViewState _state = ViewState.Loading;
+    private Camera? _camera;
+    private List<HistoryItem> _items = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _camera = await context.Cameras.AsNoTracking().SingleOrDefaultAsync(x => x.Id == CameraId);
+        if (_camera is null)
+        {
+            _state = ViewState.NotFound;
+            return;
+        }
+
+        _items = await context.AnalysisResults
+            .AsNoTracking()
+            .Where(x => x.CameraId == CameraId)
+            .Select(x => new HistoryItem
+            {
+                Id = x.Id,
+                SnapshotUrl = x.SnapshotUrl,
+                CreatedAt = x.CreatedAt,
+
+                TotalVehicles = x.TotalVehicles,
+                HasCrowding = x.HasCrowding,
+                HasAccident = x.HasAccident,
+                Density = x.TrafficDensity,
+                Summary = x.Summary
+            })
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(10)
+            .ToListAsync();
+
+        _state = ViewState.Ok;
+    }
+
+    private static string FormatLongDate(DateTime dt)
+    {
+        return dt.ToWIB().ToString("dd/MM/yyyy hh:mm:ss");
+    }
+
+    // ---- VIEW MODEL
+    public record HistoryItem
+    {
+        public required Guid Id { get; init; }
+        public required string SnapshotUrl { get; init; }
+        public required DateTime CreatedAt { get; init; }
+
+        public required int TotalVehicles { get; init; }
+        public required bool HasCrowding { get; init; }
+        public required bool HasAccident { get; init; }
+        public required TrafficDensity Density { get; init; }
+        public required string Summary { get; init; }
+    }
+
+}
