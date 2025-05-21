@@ -32,7 +32,9 @@ public static class OpenTelemetryRegistration
                 .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
                 // Metrics provided by System.Net libraries
                 .AddMeter("System.Net.Http")
-                .AddMeter("System.Net.NameResolution");
+                .AddMeter("System.Net.NameResolution")
+                // Metrics provided by App
+                .AddMeter(GlobalMeterName);
 
             if (!string.IsNullOrWhiteSpace(otelEndpoint))
                 metrics.AddOtlpExporter(otlpOptions =>
