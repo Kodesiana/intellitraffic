@@ -51,8 +51,19 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested && await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            _logger.LogInformation("Starting periodic video analysis");
-            await Process(stoppingToken);
+            using var activity = _activitySource.StartActivity();
+
+            try
+            {
+                _logger.LogInformation("Starting periodic video analysis");
+                await Process(stoppingToken);
+                _logger.LogInformation("Finished periodic video analysis");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to execute periodic video analysis");
+                activity?.SetStatus(ActivityStatusCode.Error, e.Message);
+            }
         }
     }
 
@@ -181,7 +192,7 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, e.Message);
+            _logger.LogError(e, "Failed to process camera data");
             return (camera.Id, null, 0, 0, null);
         }
         finally
