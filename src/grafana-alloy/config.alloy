@@ -27,6 +27,19 @@ otelcol.receiver.otlp "otlp_receiver" {
   }
 }
 
+// Input: Prometheus
+prometheus.scrape "example" {
+  targets = [
+    // { __address__ = "127.0.0.1:12345" },
+    { __address__ = "mediamtx:9998" },
+    { __address__ = "cadvisor:8080" },
+    { __address__ = "node_exporter:9100" },
+  ]
+
+  forward_to = [prometheus.remote_write.grafanacloud.receiver]
+}
+
+
 // Processor: Batching
 otelcol.processor.batch "default" {
   output {

@@ -9,6 +9,7 @@ services:
     build:
       context: .
       dockerfile: "./src/web/Dockerfile"
+    restart: always
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -23,8 +24,8 @@ services:
 
   mediamtx:
     image: "bluenviron/mediamtx:1.12.2-ffmpeg"
+    restart: always
     ports:
-      - "9998:9998"     # Prometheus
       - "8888:8888"     # HLS
       - "8889:8889"     # WebRTC HTTP listener
       - "8189:8189/udp" # WebRTC UDP listener
@@ -35,6 +36,7 @@ services:
 
   nginx:
     build: "./src/reverse-proxy"
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -43,6 +45,7 @@ services:
   
   alloy:
     image: grafana/alloy:v1.8.3
+    restart: always
     command:
       - "run"
       - "--server.http.listen-addr=0.0.0.0:12345"
@@ -59,4 +62,33 @@ services:
       - "alloy:/var/lib/alloy/data"
     env_file:
       - ".env"
+  
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.1
+    restart: always
+    # pid: host
+    # network_mode: host
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro      
+
+  cadvisor:
+    image: "gcr.io/cadvisor/cadvisor:v0.52.1"
+    restart: always
+    network_mode: "host"
+    privileged: true
+    devices:
+      - "/dev/kmsg"
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/dev/disk/:/dev/disk:ro"
 
