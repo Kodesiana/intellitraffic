@@ -167,7 +167,7 @@ apiTrustedProxies: []
 # Enable Prometheus-compatible metrics.
 metrics: yes
 # Address of the metrics HTTP listener.
-metricsAddress: :9998
+metricsAddress: :9300
 # Enable TLS/HTTPS on the Metrics server.
 metricsEncryption: no
 # Path to the server key. This is needed only when encryption is yes.
