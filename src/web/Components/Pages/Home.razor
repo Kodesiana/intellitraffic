@@ -164,7 +164,7 @@
         
         _statistics = new Statistics
         {
-            HighTrafficPoints = latestStatus.Count(x => x.Result.TrafficDensity is TrafficDensity.Moderate or TrafficDensity.Heavy)
+            HighTrafficPoints = latestStatus.Count(x => x.Result?.TrafficDensity is TrafficDensity.Moderate or TrafficDensity.Heavy)
         };
     }
 
