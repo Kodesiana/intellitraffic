@@ -80,8 +80,4 @@
       </Content>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Infrastructure\Migrations\" />
-    </ItemGroup>
-
 </Project>
