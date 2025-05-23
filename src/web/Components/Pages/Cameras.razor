@@ -32,7 +32,7 @@
     </NavLink>
 </div>
 
-<div class="fixed-grid has-4-cols">
+<div class="fixed-grid has-2-cols">
     <div class="grid">
         @foreach (var camera in _cameras)
         {
@@ -41,6 +41,7 @@
                     <h4 class="has-text-centered has-text-weight-semibold">@camera.GivenName</h4>
                     <h5 class="has-text-centered">@camera.OverlayName</h5>
 
+                    <p id="cctv-status-@camera.CameraId" class="mb-2">Connecting...</p>
                     <video id="cctv-@camera.CameraId" class="mt-3" autoplay controls muted></video>
                 </div>
             </div>
@@ -51,12 +52,17 @@
 <script>
     window.playCCTV = (camera_id, stream_url) => {
         const videoElement = document.getElementById('cctv-' + camera_id);
+        const statusElement = document.getElementById('cctv-status-' + camera_id);
+        
         new MediaMTXWebRTCReader({
             url: new URL(stream_url),
             onError: (err) => {
                 console.error(err);
+                statusElement.textContent = err;
+                statusElement.classList.remove("is-hidden");
             },
             onTrack: (evt) => {
+                statusElement.classList.add("is-hidden");
                 videoElement.srcObject = evt.streams[0];
             },
         });

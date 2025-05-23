@@ -41,18 +41,24 @@
         </NavLink>
     </div>
 
+    <p id="player-status" class="mb-2">Connecting...</p>
     <video id="cctv-live-stream" autoplay controls muted></video>
 </div>
 
 <script>
+    const videoElement = document.getElementById('cctv-live-stream');
+    const statusElement = document.getElementById('player-status');
+    
     window.playCCTV = (stream_url) => {
-        const videoElement = document.getElementById('cctv-live-stream');
         new MediaMTXWebRTCReader({
             url: new URL(stream_url),
             onError: (err) => {
                 console.error(err);
+                statusElement.textContent = err;
+                statusElement.classList.remove("is-hidden");
             },
             onTrack: (evt) => {
+                statusElement.classList.add("is-hidden");
                 videoElement.srcObject = evt.streams[0];
             },
         });
