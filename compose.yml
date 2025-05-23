@@ -36,14 +36,14 @@ services:
     volumes:
       - "./src/mediamtx/mediamtx.yml:/mediamtx.yml:ro"
 
-  nginx:
-    build: "./src/reverse-proxy"
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - "bogorintellitraffic"
+  # nginx:
+  #   build: "./src/reverse-proxy"
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   networks:
+  #     - "bogorintellitraffic"
   
   alloy:
     image: grafana/alloy:v1.8.3
