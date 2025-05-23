@@ -22,7 +22,7 @@
 }
 
 .cctv-container {
-    height: 80vh;
+    height: 75vh;
     margin-top: 2rem;
     overflow-y: scroll;
     display: flex;

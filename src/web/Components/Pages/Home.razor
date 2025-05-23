@@ -84,7 +84,7 @@
                         </div>
 
                         <p class="mr-4 mb-4"><i class="fa-solid fa-clock"></i> Last
-                            updated: @camera.UpdatedAt.ToString("dd/MM/yyyy hh:mm")</p>
+                            updated: @camera.UpdatedAtString</p>
 
                         <NavLink class="button is-inverted mr-2" href="@($"/stream/{camera.CameraId}")">
                             <span class="icon is-small has-text-danger">
@@ -135,25 +135,10 @@
             .ThenInclude(x => x.Camera)
             .ToListAsync();
 
-        _details = latestStatus.Select(x => new CctvDetail
-        {
-            CameraId = x.CameraId,
-            GivenName = x.Result.Camera.GivenName,
-            OverlayName = x.Result.Camera.OverlayName,
-            TotalVehicles = x.Result.TotalVehicles,
-            HasCrowding = x.Result.HasCrowding,
-            HasAccident = x.Result.HasAccident,
-            Density = x.Result.TrafficDensity,
-            UpdatedAt = x.LastUpdate
-        }).ToList();
-
-        _statistics = new Statistics
-        {
-            HighTrafficPoints = latestStatus.Count(x => x.Result.TrafficDensity is TrafficDensity.Moderate or TrafficDensity.Heavy)
-        };
+        var statusByCameraId = latestStatus.ToDictionary(k => k.CameraId, v => v.Result);
+        var lastUpdateAtByCameraId = latestStatus.ToDictionary(k => k.CameraId, v => v.LastUpdate);
 
         // set map markers
-        var cameraTrafficDensity = latestStatus.ToDictionary(k => k.CameraId, v => v.Result.TrafficDensity);
         var cameras = await context.Cameras.AsNoTracking().ToListAsync();
         _markers = cameras.Select(x => new CctvMarker
         {
@@ -162,8 +147,25 @@
             Longitude = x.Longitude,
             GivenName = x.GivenName,
             OverlayName = x.OverlayName,
-            Density = cameraTrafficDensity.GetValueOrDefault(x.Id, TrafficDensity.Unknown)
+            Density = statusByCameraId.GetValueOrDefault(x.Id)?.TrafficDensity ?? TrafficDensity.Unknown
         }).ToList();
+
+        _details = cameras.Select(x => new CctvDetail
+        {
+            CameraId = x.Id,
+            GivenName = x.GivenName,
+            OverlayName = x.OverlayName,
+            TotalVehicles = statusByCameraId.GetValueOrDefault(x.Id)?.TotalVehicles ?? 0,
+            HasCrowding = statusByCameraId.GetValueOrDefault(x.Id)?.HasCrowding ?? false,
+            HasAccident = statusByCameraId.GetValueOrDefault(x.Id)?.HasAccident ?? false,
+            Density = statusByCameraId.GetValueOrDefault(x.Id)?.TrafficDensity ?? 0,
+            UpdatedAtString = lastUpdateAtByCameraId.TryGetValue(x.Id, out var date) ? date.ToString("dd/MM/yyyy hh:mm") : "Not yet updated",
+        }).ToList();
+        
+        _statistics = new Statistics
+        {
+            HighTrafficPoints = latestStatus.Count(x => x.Result.TrafficDensity is TrafficDensity.Moderate or TrafficDensity.Heavy)
+        };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -215,7 +217,7 @@
         public required bool HasCrowding { get; init; }
         public required bool HasAccident { get; init; }
         public required TrafficDensity Density { get; init; }
-        public required DateTime UpdatedAt { get; init; }
+        public required string UpdatedAtString { get; init; }
     }
 
     public record Statistics

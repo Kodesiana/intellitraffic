@@ -128,8 +128,25 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
             if (await context.LatestAnalyses.AnyAsync(x => x.CameraId == item.cameraId, ct))
             {
                 var latest = await context.LatestAnalyses.SingleAsync(x => x.CameraId == item.cameraId, ct);
-                latest.ResultId = history.Result?.Id;
                 latest.LastUpdate = DateTime.UtcNow;
+
+                if (history.Result is not null)
+                {
+                    latest.ResultId = history.Result?.Id;
+                    continue;
+                }
+
+                if (latest.ResultId is not null)
+                {
+                    continue;
+                }
+
+                var lastResult = await context.AnalysisResults
+                    .Select(x => new { x.Id, x.CreatedAt })
+                    .OrderByDescending(x => x.CreatedAt)
+                    .FirstOrDefaultAsync(ct);
+
+                latest.ResultId = lastResult?.Id;
             }
             else
             {
@@ -155,7 +172,7 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
         await _semaphore.WaitAsync(ct);
 
         using var activity = _activitySource.StartActivity();
-        
+
         try
         {
             // create URL
@@ -171,7 +188,7 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
             Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
 
             // grab frame
-            _logger.LogInformation("Camera {CameraId} health is OK. Capturing frame from {URL}...", camera.Id,
+            _logger.LogInformation("Capturing frame from {CameraId} via HLS from {URL}...", camera.Id,
                 streamingUrl);
             var grabSuccess = await _streamGrabberService.GrabFrame(streamingUrl, savePath, ct);
             if (!grabSuccess)

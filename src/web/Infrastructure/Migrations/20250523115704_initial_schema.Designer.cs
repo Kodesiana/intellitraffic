@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
 {
     [DbContext(typeof(BogorContext))]
-    [Migration("20250520053639_fix_history_fk")]
-    partial class fix_history_fk
+    [Migration("20250523115704_initial_schema")]
+    partial class initial_schema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -188,7 +188,7 @@ namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("last_update");
 
-                    b.Property<Guid>("ResultId")
+                    b.Property<Guid?>("ResultId")
                         .HasColumnType("TEXT")
                         .HasColumnName("result_id");
 
@@ -249,8 +249,6 @@ namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
                     b.HasOne("Kodesiana.BogorIntelliTraffic.Web.Domain.Entities.AnalysisResult", "Result")
                         .WithOne()
                         .HasForeignKey("Kodesiana.BogorIntelliTraffic.Web.Domain.Entities.LatestResult", "ResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_latest_analyses_analysis_results_result_id");
 
                     b.Navigation("Camera");

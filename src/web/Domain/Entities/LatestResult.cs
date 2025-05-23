@@ -11,7 +11,7 @@ public class LatestResult
     public DateTime LastUpdate { get; set; }
 
     public Camera Camera { get; set; }
-    public AnalysisResult? Result { get; set; }
+    public AnalysisResult Result { get; set; }
 }
 
 public class LatestResultConfiguration : IEntityTypeConfiguration<LatestResult>
@@ -24,7 +24,6 @@ public class LatestResultConfiguration : IEntityTypeConfiguration<LatestResult>
 
         builder.HasOne(x => x.Result)
             .WithOne()
-            .HasForeignKey<LatestResult>(x => x.ResultId)
-            .IsRequired(false);
+            .HasForeignKey<LatestResult>(x => x.ResultId);
     }
 }

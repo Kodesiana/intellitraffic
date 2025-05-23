@@ -66,20 +66,44 @@ namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
                     input_tokens = table.Column<int>(type: "INTEGER", nullable: false),
                     output_tokens = table.Column<int>(type: "INTEGER", nullable: false),
                     camera_id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    analysis_result_id = table.Column<Guid>(type: "TEXT", nullable: true),
+                    result_id = table.Column<Guid>(type: "TEXT", nullable: true),
                     created_at = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_analysis_histories", x => x.id);
                     table.ForeignKey(
-                        name: "fk_analysis_histories_analysis_results_camera_id",
-                        column: x => x.camera_id,
+                        name: "fk_analysis_histories_analysis_results_result_id",
+                        column: x => x.result_id,
                         principalTable: "analysis_results",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                     table.ForeignKey(
                         name: "fk_analysis_histories_cameras_camera_id",
+                        column: x => x.camera_id,
+                        principalTable: "cameras",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "latest_analyses",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    camera_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    result_id = table.Column<Guid>(type: "TEXT", nullable: true),
+                    last_update = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_latest_analyses", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_latest_analyses_analysis_results_result_id",
+                        column: x => x.result_id,
+                        principalTable: "analysis_results",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "fk_latest_analyses_cameras_camera_id",
                         column: x => x.camera_id,
                         principalTable: "cameras",
                         principalColumn: "id",
@@ -89,13 +113,30 @@ namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_analysis_histories_camera_id",
                 table: "analysis_histories",
-                column: "camera_id",
+                column: "camera_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_analysis_histories_result_id",
+                table: "analysis_histories",
+                column: "result_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_analysis_results_camera_id",
                 table: "analysis_results",
                 column: "camera_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_latest_analyses_camera_id",
+                table: "latest_analyses",
+                column: "camera_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_latest_analyses_result_id",
+                table: "latest_analyses",
+                column: "result_id",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -103,6 +144,9 @@ namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "analysis_histories");
+
+            migrationBuilder.DropTable(
+                name: "latest_analyses");
 
             migrationBuilder.DropTable(
                 name: "analysis_results");
