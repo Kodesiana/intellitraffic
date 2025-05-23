@@ -3,6 +3,7 @@ using System;
 using Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kodesiana.BogorIntelliTraffic.Web.Infrastructure.Migrations
 {
     [DbContext(typeof(BogorContext))]
-    partial class BogorContextModelSnapshot : ModelSnapshot
+    [Migration("20250523103743_optional_result_analysis")]
+    partial class optional_result_analysis
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");

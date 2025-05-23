@@ -125,12 +125,10 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
             await context.AnalysisHistories.AddAsync(history, ct);
 
             // update latest results
-            if (history.Result is null) continue;
-
             if (await context.LatestAnalyses.AnyAsync(x => x.CameraId == item.cameraId, ct))
             {
                 var latest = await context.LatestAnalyses.SingleAsync(x => x.CameraId == item.cameraId, ct);
-                latest.ResultId = history.Result.Id;
+                latest.ResultId = history.Result?.Id;
                 latest.LastUpdate = DateTime.UtcNow;
             }
             else
@@ -139,7 +137,7 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
                 {
                     Id = Guid.CreateVersion7(),
                     CameraId = item.cameraId,
-                    ResultId = history.Result.Id,
+                    ResultId = history.Result?.Id,
                     LastUpdate = DateTime.UtcNow,
                 }, ct);
             }
