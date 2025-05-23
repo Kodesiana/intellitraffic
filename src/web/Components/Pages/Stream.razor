@@ -45,19 +45,21 @@
     <video id="cctv-live-stream" autoplay controls muted></video>
 </div>
 
-<script>
-    const videoElement = document.getElementById('cctv-live-stream');
-    const statusElement = document.getElementById('player-status');
-    
+<script>    
     window.playCCTV = (stream_url) => {
         new MediaMTXWebRTCReader({
             url: new URL(stream_url),
             onError: (err) => {
+                const statusElement = document.getElementById('player-status');
+                
                 console.error(err);
                 statusElement.textContent = err;
                 statusElement.classList.remove("is-hidden");
             },
             onTrack: (evt) => {
+                const statusElement = document.getElementById('player-status');
+                const videoElement = document.getElementById('cctv-live-stream');
+                
                 statusElement.classList.add("is-hidden");
                 videoElement.srcObject = evt.streams[0];
             },
