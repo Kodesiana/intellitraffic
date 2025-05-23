@@ -24,8 +24,10 @@ services:
   mediamtx:
     image: "bluenviron/mediamtx:1.12.2-ffmpeg"
     ports:
-      - "8888:8888"
-      - "9997:9997"
+      - "9998:9998"     # Prometheus
+      - "8888:8888"     # HLS
+      - "8889:8889"     # WebRTC HTTP listener
+      - "8189:8189/udp" # WebRTC UDP listener
     networks:
       - "bogorintellitraffic"
     volumes:

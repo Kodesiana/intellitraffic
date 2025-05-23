@@ -7,5 +7,6 @@ public class AnalysisConfig
     public string SystemPrompt { get; set; }
     public string SnapshotDirectory { get; set; }
     public string HlsStreamingFormatUri { get; set; }
+    public string WebRTCStreamingFormatUri { get; set; }
     public string FfmpegBinaryPath { get; set; }
 }

@@ -4,6 +4,7 @@
 @inject IDbContextFactory<BogorContext> DbFactory
 @inject IOptions<AnalysisConfig> Config
 @inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>[🔴LIVE] @(_camera?.GivenName ?? "CCTV Bogor")</PageTitle>
 
@@ -40,28 +41,29 @@
         </NavLink>
     </div>
 
-    <video id="cctv-live-stream"
-           class="video-js"
-           preload="auto"
-           autoplay
-           controls
-           muted
-           data-setup='{"liveui": true}'>
-        <source src="@_streamUrl" type="application/x-mpegURL"/>
-        <p class="vjs-no-js">
-            To view this video please enable JavaScript, and consider upgrading to a
-            web browser that
-            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-        </p>
-    </video>
+    <video id="cctv-live-stream" autoplay controls muted></video>
 </div>
+
+<script>
+    window.playCCTV = (stream_url) => {
+        const videoElement = document.getElementById('cctv-live-stream');
+        new MediaMTXWebRTCReader({
+            url: new URL(stream_url),
+            onError: (err) => {
+                console.error(err);
+            },
+            onTrack: (evt) => {
+                videoElement.srcObject = evt.streams[0];
+            },
+        });
+    }
+</script>
 
 @code {
     [Parameter] public Guid CameraId { get; set; }
 
     private ViewState _state = ViewState.Loading;
     private Camera? _camera;
-    private string _streamUrl = "";
 
     protected override async Task OnParametersSetAsync()
     {
@@ -75,15 +77,16 @@
         }
 
         _state = ViewState.Ok;
-        _streamUrl = string.Format(Config.Value.HlsStreamingFormatUri, _camera.HlsStreamName);
-
-        // _model = new()
-        // {
-        //     Name = camera.GivenName,
-        //     StreamUrl = camera.StreamUrl,
-        //     // StreamUrl = "http://localhost:8888/proxy/35336564-5b50-489b-a746-5e2ab3a5d023/index.m3u8"
-        //     // StreamUrl = "https://restreamer.kotabogor.go.id/memfs/35336564-5b50-489b-a746-5e2ab3a5d023.m3u8"
-        // };
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        
+        var streamUrl = string.Format(Config.Value.WebRTCStreamingFormatUri, _camera.HlsStreamName);
+        await JS.InvokeVoidAsync(@"playCCTV", streamUrl);
+    }
 }

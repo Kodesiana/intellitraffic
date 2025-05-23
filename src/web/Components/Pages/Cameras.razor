@@ -3,6 +3,8 @@
 @inject ILogger<Cameras> Logger
 @inject IDbContextFactory<BogorContext> DbFactory
 @inject IOptions<AnalysisConfig> Config
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>CCTV Gallery</PageTitle>
 
@@ -39,26 +41,27 @@
                     <h4 class="has-text-centered has-text-weight-semibold">@camera.GivenName</h4>
                     <h5 class="has-text-centered">@camera.OverlayName</h5>
 
-                    <video id="cctv-@camera.CameraId"
-                           class="video-js mt-3"
-                           preload="auto"
-                           autoplay
-                           controls
-                           muted
-                           data-setup='{"liveui": true}'>
-                        <source src="@camera.StreamUrl" type="application/x-mpegURL"/>
-                        <p class="vjs-no-js">
-                            To view this video please enable JavaScript, and consider upgrading to a
-                            web browser that
-                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5
-                                video</a>
-                        </p>
-                    </video>
+                    <video id="cctv-@camera.CameraId" class="mt-3" autoplay controls muted></video>
                 </div>
             </div>
         }
     </div>
 </div>
+
+<script>
+    window.playCCTV = (camera_id, stream_url) => {
+        const videoElement = document.getElementById('cctv-' + camera_id);
+        new MediaMTXWebRTCReader({
+            url: new URL(stream_url),
+            onError: (err) => {
+                console.error(err);
+            },
+            onTrack: (evt) => {
+                videoElement.srcObject = evt.streams[0];
+            },
+        });
+    }
+</script>
 
 @code {
     private ViewState _state = ViewState.Loading;
@@ -74,11 +77,25 @@
                 CameraId = x.Id,
                 GivenName = x.GivenName,
                 OverlayName = x.OverlayName,
-                StreamUrl = string.Format(Config.Value.HlsStreamingFormatUri, x.HlsStreamName)
+                StreamUrl = string.Format(Config.Value.WebRTCStreamingFormatUri, x.HlsStreamName)
             })
             .ToListAsync();
 
         _state = _cameras.Count > 0 ? ViewState.Ok : ViewState.NotFound;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+            
+        }
+
+        foreach (var camera in _cameras)
+        {
+            await JS.InvokeVoidAsync(@"playCCTV", camera.CameraId.ToString(), camera.StreamUrl);
+        }
     }
 
     // --- VIEW MODEL
@@ -89,5 +106,4 @@
         public string OverlayName { get; set; }
         public string StreamUrl { get; set; }
     }
-
 }
