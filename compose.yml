@@ -49,13 +49,13 @@ services:
     restart: unless-stopped
     command:
       - "run"
-      - "--server.http.listen-addr=0.0.0.0:9004"
+      - "--server.http.listen-addr=0.0.0.0:9400"
       - "--storage.path=/var/lib/alloy/data"
       - "/etc/alloy/config.alloy"
     ports:
       - "4317:4317" # OpenTelemetry GRPC
       - "4318:4318" # OpenTelemetry HTTP
-      - "9004:9004" # Prometheus
+      - "9400:9400" # Prometheus
     networks:
       - "bogorintellitraffic"
     volumes:
