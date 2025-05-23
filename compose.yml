@@ -26,7 +26,7 @@ services:
     image: "bluenviron/mediamtx:1.12.2-ffmpeg"
     restart: unless-stopped
     expose:
-      - "9998:9998"     # Prometheus
+      - "9300:9300"     # Prometheus
     ports:
       - "8888:8888"     # HLS
       - "8889:8889"     # WebRTC HTTP listener
@@ -68,6 +68,10 @@ services:
   node_exporter:
     image: quay.io/prometheus/node-exporter:v1.9.1
     restart: unless-stopped
+    expose:
+      - "9100:9100"
+    networks:
+    - "bogorintellitraffic"
     # pid: host
     # network_mode: host
     command:
@@ -84,7 +88,11 @@ services:
     image: "gcr.io/cadvisor/cadvisor:v0.52.1"
     restart: unless-stopped
     command:
-      - '-port=9001'
+      - '-port=9200'
+    networks:
+    - "bogorintellitraffic"
+    expose:
+      - '9200:9200'
     # network_mode: "host"
     privileged: true
     devices:
