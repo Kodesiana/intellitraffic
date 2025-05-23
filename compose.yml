@@ -60,6 +60,7 @@ services:
       - "bogorintellitraffic"
     volumes:
       - "./src/grafana-alloy/config.alloy:/etc/alloy/config.alloy"
+      - "./src/grafana-alloy/cctv.yml:/etc/alloy/cctv.yml"
       - "alloy:/var/lib/alloy/data"
     env_file:
       - ".env"

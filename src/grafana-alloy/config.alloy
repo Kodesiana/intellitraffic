@@ -39,6 +39,21 @@ prometheus.scrape "default" {
   forward_to = [prometheus.remote_write.grafanacloud.receiver]
 }
 
+// Input: Prometheus Blackbox Exporter for CCTV Liveness
+discovery.file "cctv" {
+  files = ["cctv.yml"]
+}
+
+
+prometheus.exporter.blackbox "cctv" {
+  targets = discovery.file.cctv.targets
+  config  = "{ modules: { http_2xx: { prober: http, timeout: 15s } } }"
+}
+
+prometheus.scrape "cctv" {
+  targets     = prometheus.exporter.blackbox.cctv.targets
+  forward_to  = [prometheus.remote_write.grafanacloud.receiver]
+}
 
 // Processor: Batching
 otelcol.processor.batch "default" {
