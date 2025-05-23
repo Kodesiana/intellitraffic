@@ -25,6 +25,8 @@ services:
   mediamtx:
     image: "bluenviron/mediamtx:1.12.2-ffmpeg"
     restart: unless-stopped
+    expose:
+      - "9998:9998"     # Prometheus
     ports:
       - "8888:8888"     # HLS
       - "8889:8889"     # WebRTC HTTP listener
