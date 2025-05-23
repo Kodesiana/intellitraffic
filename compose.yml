@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: "./src/web/Dockerfile"
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -24,7 +24,7 @@ services:
 
   mediamtx:
     image: "bluenviron/mediamtx:1.12.2-ffmpeg"
-    restart: always
+    restart: unless-stopped
     ports:
       - "8888:8888"     # HLS
       - "8889:8889"     # WebRTC HTTP listener
@@ -36,7 +36,7 @@ services:
 
   nginx:
     build: "./src/reverse-proxy"
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -45,7 +45,7 @@ services:
   
   alloy:
     image: grafana/alloy:v1.8.3
-    restart: always
+    restart: unless-stopped
     command:
       - "run"
       - "--server.http.listen-addr=0.0.0.0:12345"
@@ -65,7 +65,7 @@ services:
   
   node_exporter:
     image: quay.io/prometheus/node-exporter:v1.9.1
-    restart: always
+    restart: unless-stopped
     # pid: host
     # network_mode: host
     command:
@@ -80,7 +80,7 @@ services:
 
   cadvisor:
     image: "gcr.io/cadvisor/cadvisor:v0.52.1"
-    restart: always
+    restart: unless-stopped
     command:
       - '-port=9001'
     # network_mode: "host"
