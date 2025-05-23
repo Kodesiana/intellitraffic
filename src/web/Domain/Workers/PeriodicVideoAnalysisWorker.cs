@@ -131,6 +131,7 @@ public class PeriodicVideoAnalysisWorker : BackgroundService
             {
                 var latest = await context.LatestAnalyses.SingleAsync(x => x.CameraId == item.cameraId, ct);
                 latest.ResultId = history.Result.Id;
+                latest.LastUpdate = DateTime.UtcNow;
             }
             else
             {
